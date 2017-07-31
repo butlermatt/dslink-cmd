@@ -157,9 +157,6 @@ func walker(root, prefix string, out *zip.Writer) (func(string, os.FileInfo, err
 			cp(path, dst, out)
 		}
 
-		if prefix == "" {
-			fmt.Printf("file: %s\n", path)
-		}
 		return nil
 	}
 }

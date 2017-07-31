@@ -30,5 +30,7 @@ func main() {
 
 	if err != nil {
 		fmt.Println("error occurred:", err)
+	} else {
+		fmt.Println("Done!")
 	}
 }
