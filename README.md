@@ -16,6 +16,23 @@ Display help on the available commands.
 dslink help <command>
 ```
 
+### dslink build
+
+Generate a .zip file for the dslink project. 
+```
+dslink-cmd build <language> [-o=project.zip]
+```
+
+The `language` must be a valid language for the dslink to build. Currently only `dart` is
+supported. More languages will be available in the future.
+
+The `-o` argument is optional and if omitted, the default build file will be
+`build.zip`.
+
+_Note: It does not currently support symlinked files._
+
+
+_The following is currently unsupported_
 ### dslink init
 
 Generates project scaffolding for a new dslink repository.
@@ -47,18 +64,3 @@ lib\src\
 lib\src\nodes\
 lib\src\models\
 ```
-
-### dslink build
-
-Generate a .zip file for the dslink project. This command requires that
-dart2js is in the `$PATH` variable
-
-```
-dslink build -o=project.zip
-```
-
-The `-o` argument is optional and if omitted, the default build file will be
-`build.zip`.
-
-Build will also copy any files and directories in the `data/` directory. _Note:
-It does not currently support symlinked files._
