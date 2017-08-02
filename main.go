@@ -36,19 +36,18 @@ func main() {
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	case build.FullCommand():
 		if *buildType == "" {
-			*buildType, err = checkBuild()
+			*buildType, err = checkCWD()
 		}
 		if err == nil {
-			fmt.Println("build: ", *buildType)
 			err = tryBuild(*buildType, *buildOutput)
 		}
 	}
 
 	if err != nil {
-		fmt.Println("error occurred:", err)
-	} else {
-		fmt.Println("Done!")
+		fmt.Fprintf(os.Stderr, "error occurred: %v", err)
+		os.Exit(1)
 	}
+	fmt.Println("Done!")
 }
 
 func tryBuild(ty, out string) error {
@@ -74,16 +73,15 @@ func tryBuild(ty, out string) error {
 	return err
 }
 
-func checkBuild() (string, error) {
+func checkCWD() (string, error) {
 	var cantFind error = fmt.Errorf("unable to determine project type. Please specify build language.")
 
 	dir, err := os.Getwd()
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "error checking working directory")
 	}
 
 	cd := filepath.Base(dir)
-	fmt.Println(cd)
 
 	si := strings.Index(cd, "-")
 	if si == -1 {
