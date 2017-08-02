@@ -95,7 +95,7 @@ func checkBuild() (string, error) {
 
 	ei := strings.Index(cd[si + 1:], "-")
 	if ei == -1 {
-		return cd[si + 1:], nil
+		return "", cantFind
 	}
 
 	return cd[si + 1:ei + si + 1], nil
