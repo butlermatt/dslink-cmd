@@ -13,7 +13,7 @@ projects.
 Display help on the available commands.
 
 ```
-dslink help <command>
+dslink-cmd help <command>
 ```
 
 ### dslink build
@@ -29,26 +29,33 @@ supported. More languages will be available in the future.
 The `-o` argument is optional and if omitted, the default build file will be
 `build.zip`.
 
-_Note: It does not currently support symlinked files._
+_Note: It does not currently support symbolic link files._
 
 
-_The following is currently unsupported_
 ### dslink init
 
 Generates project scaffolding for a new dslink repository.
 
 ```
-dslink init -project=<projectName> -node=<nodeName>
+dslink-cmd init <projectLanguage> <projectName> [--node=<nodeName>] [--dir=<directory>] 
 ```
+
+`projectLanguage` is the programming language that the project will be in. Supported values are
+`dart`, `java`, `javascript`, `python`, `dotnet`, `c`, and `scala`. _Note: Currently only Dart is
+implemented._
 
 `projectName` is the name for the project sources. This will automatically
 create a project with the name *dslink_projectname* and generate several files
 by the name of *projectname.dart*.
 
-`nodeName` is the default name for the nodes which will appear in DSA/DGLux for
-this project.
+Optional `nodeName` is the default name for the nodes which will appear in DSA/DGLux for
+this project. This is often a capitalized version of the project name.
 
-This tool will generate the following files:
+Optional `directory` will initialize the project in the specified directory. This will override
+the default project directory of `dslink-<language>-<projectName>`
+
+This tool will generate the following files for Dart. _Please be sure to check all files as some
+may require additional information before working correctly_:
 
 ```
 .gitignore
