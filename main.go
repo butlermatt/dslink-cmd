@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
+
+const version = "dslink-cmd version: 0.0.2"
 
 const (
 	bDart   string = "dart"
@@ -22,29 +24,47 @@ const (
 
 var buildTypes = []string{bDart, bJava, bJS, bPython, bDotNet, bC, bScala}
 
-var (
-	app = kingpin.New(os.Args[0], "A command line project maintainer for DSLinks")
+type initConf struct {
+	Lang string
+	Name string
+	Node string
+	Dir  string
+}
 
-	build       = app.Command("build", "Build an existing project.")
-	buildType   = build.Arg("language", "Programming language of the project to build.").Enum(buildTypes...)
-	buildOutput = build.Flag("out", "Output file").Short('o').Default("build.zip").String()
+var (
+	app = kingpin.New(os.Args[0], "A command line project maintainer for DSLinks").Version(version)
+
+	buildCmd    = app.Command("build", "Build an existing project.")
+	buildType   = buildCmd.Arg("language", "Programming language of the project to build.").Enum(buildTypes...)
+	buildOutput = buildCmd.Flag("out", "Output file").Short('o').Default("build.zip").String()
+
+	initCmd  = app.Command("init", "Initialize a new project")
+	initType = initCmd.Arg("language", "Programming language of the project to initialize.").Required().Enum(buildTypes...)
+	initName = initCmd.Arg("name", "Short name of the project.").Required().String()
+	initNode = initCmd.Flag("node", "Default node name in the DSA hierarchy. Uses program name if unspecified.").Short('n').String()
+	initDir  = initCmd.Flag("dir", "Directory to initialize the project into. Defaults to dslink-<langauge>-<name>").Short('d').String()
 )
 
 func main() {
 	var err error
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
-	case build.FullCommand():
+	case buildCmd.FullCommand():
 		if *buildType == "" {
 			*buildType, err = checkCWD()
 		}
 		if err == nil {
 			err = tryBuild(*buildType, *buildOutput)
 		}
+	case initCmd.FullCommand():
+		if *initNode == "" {
+			*initNode = *initName
+		}
+		err = tryInit(initConf{*initType, *initName, *initNode, *initDir})
 	}
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error occurred: %v", err)
+		fmt.Fprintf(os.Stderr, "error occurred: %v\n", err)
 		os.Exit(1)
 	}
 	fmt.Println("Done!")
@@ -52,6 +72,7 @@ func main() {
 
 func tryBuild(ty, out string) error {
 	var err error
+
 	switch ty {
 	case bDart:
 		err = buildDart(out)
@@ -87,14 +108,40 @@ func checkCWD() (string, error) {
 	if si == -1 {
 		return "", cantFind
 	}
-	if len(cd) <= si + 1 {
+
+	si += 1 // bump to just after start index
+	if len(cd) <= si {
 		return "", cantFind
 	}
 
-	ei := strings.Index(cd[si + 1:], "-")
+	ei := strings.Index(cd[si:], "-")
 	if ei == -1 {
 		return "", cantFind
 	}
 
-	return cd[si + 1:ei + si + 1], nil
+	return cd[si : ei+si], nil
+}
+
+func tryInit(conf initConf) error {
+	var err error
+
+	switch conf.Lang {
+	case bDart:
+		err = initDart(conf)
+	case bC:
+	case bDotNet:
+	case bJava:
+	case bJS:
+	case bPython:
+	case bScala:
+		err = fmt.Errorf("init for %q is not currently implemented.\n", conf.Lang)
+	default:
+		err = fmt.Errorf("unknown init language %q", conf.Lang)
+	}
+
+	if err != nil {
+		err = errors.Wrap(err, "error initializing")
+	}
+
+	return err
 }
