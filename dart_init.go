@@ -15,64 +15,45 @@ func initDart(c initConf) error {
 		c.Dir = fmt.Sprintf("dslink-%s-%s", c.Lang, c.Name)
 	}
 
-	err := os.Mkdir(c.Dir, 0755)
+	root := &FileItem{Path: c.Dir, IsDir: true}
+	root.Add(&FileItem{Path: filepath.Join(c.Dir, "README.md"), Tmpl: templates.README})
+	root.Add(&FileItem{Path: filepath.Join(c.Dir, "dslink.json"), Tmpl: templates.DSLinkJson})
+	root.Add(&FileItem{Path: filepath.Join(c.Dir, "pubspec.yaml"), Tmpl: templates.DartPubSpec})
+
+	bin := &FileItem{Path: filepath.Join(c.Dir, "bin"), IsDir: true}
+	bin.Add(&FileItem{Path: filepath.Join(bin.Path, "run.dart"), Tmpl: templates.DartRun})
+	root.Add(bin)
+
+	lib := &FileItem{Path: filepath.Join(c.Dir, "lib"), IsDir: true}
+	lib.Add(&FileItem{Path: filepath.Join(lib.Path, c.Name + ".dart")})
+	lib.Add(&FileItem{Path: filepath.Join(lib.Path, "models.dart")})
+	root.Add(lib)
+
+	src := &FileItem{Path: filepath.Join(lib.Path, "src"), IsDir: true}
+	src.Add(&FileItem{Path: filepath.Join(src.Path, "models"), IsDir: true})
+	src.Add(&FileItem{Path: filepath.Join(src.Path, "nodes"), IsDir: true})
+	lib.Add(src)
+
+	return walkFiles(root, c)
+}
+
+func walkFiles(f *FileItem, c initConf) error {
+	fmt.Println("Working on:", f.Path)
+	fmt.Printf("Children: %+v", f.Childs)
+	if !f.IsDir {
+		return mkfile(f.Path, f.Tmpl, c)
+	}
+
+	err := os.Mkdir(f.Path, 0755)
 	if err != nil {
-		if os.IsExist(err) {
-			return errors.New("can't initialize on existing directory")
-		} else {
-			return errors.Wrapf(err, "error creating directory %q", c.Dir)
+		return errors.Wrapf(err, "error creating directory %q", f.Path)
+	}
+
+	for _, ff := range f.Childs {
+		err := walkFiles(ff, c)
+		if err != nil {
+			return err
 		}
-	}
-
-	err = mkfile(filepath.Join(c.Dir, "README.md"), templates.README, c)
-	if err != nil {
-		return err
-	}
-	err = mkfile(filepath.Join(c.Dir, "dslink.json"), templates.DSLinkJson, c)
-	if err != nil {
-		return err
-	}
-	err = mkfile(filepath.Join(c.Dir, "pubspec.yaml"), templates.DartPubSpec, c)
-	if err != nil {
-		return err
-	}
-
-	bin := filepath.Join(c.Dir, "bin")
-	err = os.Mkdir(bin, 0755)
-	if err != nil {
-		return errors.Wrapf(err, "error creating directory %q", bin)
-	}
-
-	err = mkfile(filepath.Join(bin, "run.dart"), templates.DartRun, c)
-	if err != nil {
-		return err
-	}
-
-	lib := filepath.Join(c.Dir, "lib")
-	err = os.Mkdir(lib, 0755)
-	if err != nil {
-		return errors.Wrapf(err, "error creating directory %q", lib)
-	}
-
-	err = mkfile(filepath.Join(lib, c.Name + ".dart"), "", c)
-	if err != nil {
-		return err
-	}
-	err = mkfile(filepath.Join(lib, "models.dart"), "", c)
-	if err != nil {
-		return err
-	}
-
-	models := filepath.Join(lib, "src", "models")
-	err = os.MkdirAll(models, 0755)
-	if err != nil {
-		return errors.Wrapf(err, "error create directory %q", models)
-	}
-
-	nodes := filepath.Join(lib, "src", "nodes")
-	err = os.MkdirAll(nodes, 0755)
-	if err != nil {
-		return errors.Wrapf(err, "error create directory %q", nodes)
 	}
 
 	return nil
