@@ -14,6 +14,7 @@ func initDart(c initConf) error {
 
 	root := &FileItem{Path: c.Dir, IsDir: true}
 	root.Add(&FileItem{Path: filepath.Join(c.Dir, "README.md"), Tmpl: templates.README})
+	root.Add(&FileItem{Path: filepath.Join(c.Dir, "LICENSE"), Tmpl: templates.LICENSE})
 	root.Add(&FileItem{Path: filepath.Join(c.Dir, "dslink.json"), Tmpl: templates.DSLinkJson})
 	root.Add(&FileItem{Path: filepath.Join(c.Dir, "pubspec.yaml"), Tmpl: templates.DartPubSpec})
 
