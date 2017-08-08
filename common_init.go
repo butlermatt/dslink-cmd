@@ -23,17 +23,12 @@ func (f *FileItem) Add(fi *FileItem) {
 }
 
 func (f *FileItem) FilePath() string {
-	p := makePath(f)
-	return filepath.Join(p...)
-}
-
-func makePath(f *FileItem) []string {
-	var p []string
+	var p string
 	if f.parent != nil {
-		p = makePath(f.parent)
+		p = f.parent.FilePath()
 	}
 
-	return append(p, f.Path)
+	return filepath.Join(p, f.Path)
 }
 
 func walkFiles(f *FileItem, c initConf) error {
