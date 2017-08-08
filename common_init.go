@@ -20,8 +20,6 @@ func (f *FileItem) Add(fi *FileItem) {
 }
 
 func walkFiles(f *FileItem, c initConf) error {
-	fmt.Println("Working on:", f.Path)
-	fmt.Printf("Children: %+v", f.Childs)
 	if !f.IsDir {
 		return mkfile(f.Path, f.Tmpl, c)
 	}

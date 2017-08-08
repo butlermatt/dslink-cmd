@@ -76,10 +76,10 @@ func tryBuild(ty, out string) error {
 	switch ty {
 	case bDart:
 		err = buildDart(out)
+	case bJS:
 	case bC:
 	case bDotNet:
 	case bJava:
-	case bJS:
 	case bPython:
 	case bScala:
 		err = fmt.Errorf("build for %q is not currently implemented.\n", ty)
@@ -128,10 +128,11 @@ func tryInit(conf initConf) error {
 	switch conf.Lang {
 	case bDart:
 		err = initDart(conf)
+	case bJS:
+		err = initJs(conf)
 	case bC:
 	case bDotNet:
 	case bJava:
-	case bJS:
 	case bPython:
 	case bScala:
 		err = fmt.Errorf("init for %q is not currently implemented.\n", conf.Lang)
