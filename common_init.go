@@ -4,6 +4,7 @@ import (
 	"os"
 	"fmt"
 	"text/template"
+	"path/filepath"
 
 	"github.com/pkg/errors"
 )
@@ -13,20 +14,36 @@ type FileItem struct {
 	Tmpl   string
 	IsDir  bool
 	Childs []*FileItem
+	parent *FileItem
 }
 
 func (f *FileItem) Add(fi *FileItem) {
+	fi.parent = f
 	f.Childs = append(f.Childs, fi)
+}
+
+func (f *FileItem) FilePath() string {
+	p := makePath(f)
+	return filepath.Join(p...)
+}
+
+func makePath(f *FileItem) []string {
+	var p []string
+	if f.parent != nil {
+		p = makePath(f.parent)
+	}
+
+	return append(p, f.Path)
 }
 
 func walkFiles(f *FileItem, c initConf) error {
 	if !f.IsDir {
-		return mkfile(f.Path, f.Tmpl, c)
+		return mkfile(f.FilePath(), f.Tmpl, c)
 	}
 
-	err := os.Mkdir(f.Path, 0755)
+	err := os.Mkdir(f.FilePath(), 0755)
 	if err != nil {
-		return errors.Wrapf(err, "error creating directory %q", f.Path)
+		return errors.Wrapf(err, "error creating directory %q", f.FilePath())
 	}
 
 	for _, ff := range f.Childs {

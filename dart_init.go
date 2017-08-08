@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/butlermatt/dslink-cmd/templates"
 )
@@ -13,24 +12,24 @@ func initDart(c initConf) error {
 	}
 
 	root := &FileItem{Path: c.Dir, IsDir: true}
-	root.Add(&FileItem{Path: filepath.Join(c.Dir, "README.md"), Tmpl: templates.README})
-	root.Add(&FileItem{Path: filepath.Join(c.Dir, "LICENSE"), Tmpl: templates.LICENSE})
-	root.Add(&FileItem{Path: filepath.Join(c.Dir, ".gitignore"), Tmpl: templates.GitIgnore})
-	root.Add(&FileItem{Path: filepath.Join(c.Dir, "dslink.json"), Tmpl: templates.DSLinkJson})
-	root.Add(&FileItem{Path: filepath.Join(c.Dir, "pubspec.yaml"), Tmpl: templates.DartPubSpec})
+	root.Add(&FileItem{Path: "README.md", Tmpl: templates.README})
+	root.Add(&FileItem{Path: "LICENSE", Tmpl: templates.LICENSE})
+	root.Add(&FileItem{Path: ".gitignore", Tmpl: templates.GitIgnore})
+	root.Add(&FileItem{Path: "dslink.json", Tmpl: templates.DSLinkJson})
+	root.Add(&FileItem{Path: "pubspec.yaml", Tmpl: templates.DartPubSpec})
 
-	bin := &FileItem{Path: filepath.Join(c.Dir, "bin"), IsDir: true}
-	bin.Add(&FileItem{Path: filepath.Join(bin.Path, "run.dart"), Tmpl: templates.DartRun})
+	bin := &FileItem{Path: "bin", IsDir: true}
+	bin.Add(&FileItem{Path: "run.dart", Tmpl: templates.DartRun})
 	root.Add(bin)
 
-	lib := &FileItem{Path: filepath.Join(c.Dir, "lib"), IsDir: true}
-	lib.Add(&FileItem{Path: filepath.Join(lib.Path, c.Name + ".dart")})
-	lib.Add(&FileItem{Path: filepath.Join(lib.Path, "models.dart")})
+	lib := &FileItem{Path: "lib", IsDir: true}
+	lib.Add(&FileItem{Path: c.Name + ".dart"})
+	lib.Add(&FileItem{Path: "models.dart"})
 	root.Add(lib)
 
-	src := &FileItem{Path: filepath.Join(lib.Path, "src"), IsDir: true}
-	src.Add(&FileItem{Path: filepath.Join(src.Path, "models"), IsDir: true})
-	src.Add(&FileItem{Path: filepath.Join(src.Path, "nodes"), IsDir: true})
+	src := &FileItem{Path: "src", IsDir: true}
+	src.Add(&FileItem{Path: "models", IsDir: true})
+	src.Add(&FileItem{Path: "nodes", IsDir: true})
 	lib.Add(src)
 
 	return walkFiles(root, c)
